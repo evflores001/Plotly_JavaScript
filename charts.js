@@ -58,32 +58,35 @@ function buildCharts(sample) {
   // 2. Use d3.json to load and retrieve the samples.json file 
   d3.json("samples.json").then((data) => {
     // 3. Create a variable that holds the samples array. 
-    var samples = data.samples;
+    var samplesList = data.samples;
     // 4. Create a variable that filters the samples for the object with the desired sample number.
-    var filteredSamples = samples.filter(meta => meta.id == sample);
+    var filteredSamples = samplesList.filter(meta => meta.id == sample);
     //  5. Create a variable that holds the first sample in the array.
-    var holder = filteredSamples[0];
-
+    var heldSamples = filteredSamples[0];
+    // Do the same for wash freq.
+    var wfreqList = data.metadata
+    var filteredWfreq = wfreqList.filter(meta => meta.id == sample)
+    var wfreq = filteredWfreq[0]
     // 6. Create variables that hold the otu_ids, otu_labels, and sample_values.
-    var otu_ids = holder.otu_ids;
-    var otu_labels = holder.otu_labels;
-    var sample_values = holder.sample_values;
+    var otu_ids = heldSamples.otu_ids;
+    var otu_labels = heldSamples.otu_labels;
+    var sample_values = heldSamples.sample_values;
 
-    var sample_values10 = holder.sample_values.slice(0,10).reverse();
+    var sample_values10 = heldSamples.sample_values.slice(0,10).reverse();
     console.log(otu_ids, otu_labels, sample_values);
-
+    var w_frq = wfreq.wfreq;
     // 7. Create the yticks for the bar chart.
     // Hint: Get the the top 10 otu_ids and map them in descending order  
     //  so the otu_ids with the most bacteria are last. 
 
     var yticks = otu_ids.slice(0,10).reverse();
-    var yticksStr = yticks.map(tick => "OTU " + tick.toString());
+    var y_labels = yticks.map(tick => "OTU " + tick.toString());
     console.log(yticks);
-    console.log(yticksStr);
+    console.log(y_labels);
     // 8. Create the trace for the bar chart. 
     var barData = [{
       x: sample_values10,
-      y: yticksStr,
+      y: y_labels,
       type: "bar",
       orientation: "h",
       text: otu_labels
@@ -91,7 +94,8 @@ function buildCharts(sample) {
     // 9. Create the layout for the bar chart. 
     var barLayout = {
       title: "Top 10 Bacteria Cultures Found",
-      xaxis: sample_values
+      xaxis: sample_values,
+      plot_bgcolor : '#66ff66'
   };
     // 10. Use Plotly to plot the data with the layout. 
     Plotly.newPlot("bar", barData, barLayout);
@@ -104,7 +108,7 @@ function buildCharts(sample) {
       marker: {
         color: otu_ids,
         size: sample_values,
-        colorscale: "Earth"     
+        colorscale: "Picnic"     
       },
       type: "scatter"
     }];
@@ -119,56 +123,13 @@ function buildCharts(sample) {
     // 3. Use Plotly to plot the data with the layout.
     Plotly.newPlot("bubble", bubbleData, bubbleLayout);
         
-    // Deliverable 3: 1. Create a variable that filters the metadata array for the object with the desired sample number.
-    var metaArray = data.metadata;
-    console.log(metaArray);
-    console.log(data);
-    //var filteredSamples = samples.filter(meta => meta.id == sample);
-    
-    function getWFreq(sample) {
-      if (metaArray.map(i => i.id == sample))
-      return sample.wfreq; 
-    };
-       
-    var filteredMeta = sample;
-    console.log(filteredMeta);
-    
-    // Create a variable that holds the first sample in the array.
-    var holder = filteredMeta[0];
-    console.log(holder);
-    // 2. Create a variable that holds the first sample in the metadata array.
-    var meta2 = data.metadata[0];
-    console.log(meta2);
-
-    // TRY: looping through all wreq values, grab
-
-    var allMeta = data.metadata;
-    console.log(allMeta);
-
-    var sampleWash = allMeta.filter(i => i.id == sample);
-    console.log(sampleWash);
-
-    var allWfreq = sampleWash[0].wfreq;
-    console.log(allWfreq);
-
-    // 3. Create a variable that holds the washing frequency. // keys values
-    var washing = parseFloat(meta2.wfreq);
-    var resultWashing = filteredSamples.wfreq;
-    console.log(washing);
-    console.log(resultWashing);
-
-
-    // D2: 3. Use Plotly to plot the data with the layout.
-    // var trial = d3.select("sample-metadata").node();
-    // console.log(trial);
-    
 
     // 4. Create the trace for the gauge chart.
     var gaugeData = [{
       type: "indicator",
       mode: "gauge+number",
-      // value: d3.select("selDataset").on("change", buildCharts),
-      value: allWfreq,
+      
+      value: w_frq,
       gauge: {
         axis: { 
           range: [0, 10],
@@ -180,6 +141,7 @@ function buildCharts(sample) {
           dtick: 2
         },         
         bar: { color: "black" },
+        bordercolor: "black",
         steps: [
           { range: [0, 2], color: "red"},
           { range: [2, 4], color: "orange"},
